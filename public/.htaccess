@@ -1,0 +1,48 @@
+# .htaccess for shared hosting
+# Place this file in the site root (or the folder mapped to /Yenixa-2026-test/) so it is copied into dist/ by Vite (public/ is copied verbatim).
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /Yenixa-2026-test/
+
+  # If the request is for a real file or directory, serve it.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Otherwise, serve index.html (SPA fallback).
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Security: disable directory listings
+Options -Indexes
+
+# Caching for fingerprinted assets and media
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType video/mp4 "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Long cache for fingerprinted static assets
+  <FilesMatch "\.(?:css|js|png|jpg|jpeg|gif|svg|mp4)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # No cache for index.html so updates propagate
+  <FilesMatch "\.(?:html)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# Prevent access to .env or other hidden files
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
